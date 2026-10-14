@@ -1,0 +1,5 @@
+{"jobs": [
+  {"name": "lint", "conclusion": "failure"},
+  {"name": "build (Rhizome, aarch64-darwin, macos-latest)", "conclusion": "failure"},
+  {"name": "notify", "conclusion": null}
+]}

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+    - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    # Shellcheck, the package build and every payload fixture.
+    - run: nix flake check
+    - name: Check formatting
+      run: |
+        if ! nix fmt -- --check .; then
+          exit 1
+        fi
+
+  # Runs the action itself on a real runner and event, in dry-run mode, to
+  # cover what the fixtures can't: action.yml wiring, the runner's bash and a
+  # real event payload (this PR's title may contain anything).
+  action:
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+    - id: notify
+      uses: ./slack-notify
+      with:
+        token: unused-in-dry-run
+        status: failure
+        failed-jobs: true
+        fields: |
+          Runner: ${{ matrix.runner }}
+        dry-run: true
+    - name: Check the payload
+      env:
+        PAYLOAD: ${{ steps.notify.outputs.payload }}
+      run: |
+        printf '%s\n' "$PAYLOAD" | jq .
+        printf '%s' "$PAYLOAD" | jq -e '
+          (.text | startswith(":x: ")) and
+          (.attachments[0].blocks[0].fields | map(.text) | any(startswith("*Failed*"))) and
+          (.attachments[0].blocks[0].fields | map(.text) | any(. == "*Runner*\n${{ matrix.runner }}"))'

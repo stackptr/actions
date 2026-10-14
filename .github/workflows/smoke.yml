@@ -1,0 +1,38 @@
+name: Smoke test
+
+# Posts real messages, so it runs only on request. Needs the SLACK_BOT_TOKEN
+# repo secret and a channel Hypha can post in.
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Channel name or ID to post in
+        default: "#updates"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+    - id: post
+      uses: ./slack-notify
+      with:
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: ${{ inputs.channel }}
+        status: info
+        title: slack-notify smoke test
+        fields: |
+          Step: top-level message
+    - name: Reply in the thread
+      uses: ./slack-notify
+      with:
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+        channel: ${{ steps.post.outputs.channel }}
+        status: success
+        title: slack-notify smoke test, threaded reply
+        thread-ts: ${{ steps.post.outputs.ts }}
+        broadcast: true

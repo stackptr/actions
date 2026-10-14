@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# `nix flake check` (or `nix fmt` with the argument `fmt`) for sandboxed sessions (e.g. Claude Code cloud) that can't
+# download GitHub tarballs but can `git clone` public repos. Fetches nixpkgs as
+# a shallow git clone of the rev locked in flake.lock; the content and narHash
+# match, so flake.lock is left untouched.
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+url=$(jq -r '
+  .nodes[.nodes.root.inputs.nixpkgs].locked
+  | "git+https://github.com/\(.owner)/\(.repo)?rev=\(.rev)&shallow=1"
+' flake.lock)
+
+if [[ ${1:-} == fmt ]]; then
+  shift
+  exec nix fmt --override-input nixpkgs "$url" -- "$@"
+fi
+exec nix flake check --override-input nixpkgs "$url" "$@"

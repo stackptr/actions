@@ -1,0 +1,6 @@
+{
+  "head_commit": {
+    "message": "chore: update flake inputs\n\nBody line that must not appear.",
+    "url": "https://github.com/stackptr/rc/commit/0123456789abcdef0123456789abcdef01234567"
+  }
+}

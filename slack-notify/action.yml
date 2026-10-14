@@ -1,0 +1,84 @@
+name: Slack notify
+description: Post a status message to Slack as a bot with chat.postMessage.
+author: stackptr
+
+inputs:
+  token:
+    description: Slack bot token (xoxb-...) with chat:write. Not required in dry-run mode.
+    required: true
+  channel:
+    description: Channel name (#updates) or ID.
+    default: "#updates"
+  status:
+    description: >-
+      success, failure, cancelled or info. Required: `job.status` is not
+      available in input defaults, so pass it (for example `${{ job.status }}`).
+    required: true
+  title:
+    description: >-
+      Headline and notification preview. Defaults to
+      `<title-prefix> for <failed jobs> (<origin>)`, for example
+      `CI failed for Stroma (PR #659)`.
+    default: ""
+  title-prefix:
+    description: >-
+      Start of the default title. Defaults to the workflow name plus
+      "succeeded", "failed" or "cancelled" from the status.
+    default: ""
+  fields:
+    description: >-
+      One `Label: value` per line, shown as fields. The value is Slack mrkdwn,
+      so escape `&`, `<` and `>` in untrusted text.
+    default: ""
+  failed-jobs:
+    description: >-
+      Set to "true" to list the failed jobs of this run and add Failed and
+      Trigger fields. Needs `permissions: actions: read` on the calling job.
+    default: "false"
+  github-token:
+    description: Token for listing the run's jobs when failed-jobs is true.
+    default: ${{ github.token }}
+  thread-ts:
+    description: Reply in the thread of this message timestamp.
+    default: ""
+  broadcast:
+    description: Set to "true" to also show a threaded reply in the channel.
+    default: "false"
+  dry-run:
+    description: Set to "true" to build the payload and skip the Slack call.
+    default: "false"
+
+outputs:
+  ts:
+    description: Timestamp of the posted message, for thread-ts.
+    value: ${{ steps.send.outputs.ts }}
+  channel:
+    description: ID of the channel the message was posted to.
+    value: ${{ steps.send.outputs.channel }}
+  payload:
+    description: The JSON payload, in dry-run mode only.
+    value: ${{ steps.send.outputs.payload }}
+
+runs:
+  using: composite
+  steps:
+    - id: context
+      shell: bash
+      env:
+        INPUT_STATUS: ${{ inputs.status }}
+        INPUT_TITLE: ${{ inputs.title }}
+        INPUT_TITLE_PREFIX: ${{ inputs.title-prefix }}
+        INPUT_FIELDS: ${{ inputs.fields }}
+        INPUT_FAILED_JOBS: ${{ inputs.failed-jobs }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: '"$GITHUB_ACTION_PATH/github-context.sh"'
+
+    - id: send
+      shell: bash
+      env:
+        SLACK_TOKEN: ${{ inputs.token }}
+        SLACK_CHANNEL: ${{ inputs.channel }}
+        NOTIFY_THREAD_TS: ${{ inputs.thread-ts }}
+        NOTIFY_BROADCAST: ${{ inputs.broadcast }}
+        NOTIFY_DRY_RUN: ${{ inputs.dry-run == 'true' && '1' || '' }}
+      run: '"$GITHUB_ACTION_PATH/notify.sh"'

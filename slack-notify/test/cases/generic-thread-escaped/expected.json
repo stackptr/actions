@@ -1,0 +1,28 @@
+{
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "fields": [
+            {
+              "text": "*Note*\nhas: more colons",
+              "type": "mrkdwn"
+            },
+            {
+              "text": "*Blank above*\nskipped",
+              "type": "mrkdwn"
+            }
+          ],
+          "type": "section"
+        }
+      ],
+      "color": "#439FE0"
+    }
+  ],
+  "channel": "C0123456789",
+  "reply_broadcast": true,
+  "text": ":information_source: Tom &amp; Jerry &lt;script&gt; \"quoted\" \\back\\slash",
+  "thread_ts": "1700000000.000100",
+  "unfurl_links": false,
+  "unfurl_media": false
+}

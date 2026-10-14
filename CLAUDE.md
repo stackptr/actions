@@ -27,7 +27,7 @@ nix-flake check            # shellcheck, package build, payload fixtures
 nix fmt                    # alejandra
 ```
 
-In a sandboxed cloud session `github:` inputs fail with HTTP 403 but `git clone` works: run `scripts/check-sandboxed` instead, which overrides nixpkgs with a shallow git fetch of the locked rev. Evaluate nothing else there; CI runs the full check.
+In a sandboxed cloud session `github:` inputs fail with HTTP 403 but `git clone` works: run `scripts/check-sandboxed` (and `scripts/check-sandboxed fmt .`) instead, which override nixpkgs with a shallow git fetch of the locked rev. Flake files must be `git add`ed first, or Nix can't see them.
 
 ## Secrets
 

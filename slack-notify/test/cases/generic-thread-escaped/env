@@ -1,0 +1,8 @@
+NOTIFY_STATUS=info
+NOTIFY_TITLE='Tom & Jerry <script> "quoted" \back\slash'
+NOTIFY_FIELDS='Note: has: more colons
+
+Blank above: skipped'
+NOTIFY_THREAD_TS=1700000000.000100
+NOTIFY_BROADCAST=true
+SLACK_CHANNEL=C0123456789

@@ -1,0 +1,35 @@
+{
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "fields": [
+            {
+              "text": "*Unit*\nrestic-backups-home.service",
+              "type": "mrkdwn"
+            },
+            {
+              "text": "*Exit*\n1",
+              "type": "mrkdwn"
+            }
+          ],
+          "type": "section"
+        },
+        {
+          "elements": [
+            {
+              "text": "<https://monitoring.zx.dev|Grafana> · <https://example.com/logs|Logs>",
+              "type": "mrkdwn"
+            }
+          ],
+          "type": "context"
+        }
+      ],
+      "color": "#CC0000"
+    }
+  ],
+  "channel": "#updates",
+  "text": ":x: backup failed on glyph",
+  "unfurl_links": false,
+  "unfurl_media": false
+}

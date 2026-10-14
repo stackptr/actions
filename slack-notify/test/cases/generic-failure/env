@@ -1,0 +1,5 @@
+NOTIFY_STATUS=failure
+NOTIFY_TITLE='backup failed on glyph'
+NOTIFY_FIELDS='Unit: restic-backups-home.service
+Exit: 1'
+NOTIFY_CONTEXT='<https://monitoring.zx.dev|Grafana> · <https://example.com/logs|Logs>'

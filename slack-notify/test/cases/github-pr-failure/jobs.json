@@ -1,0 +1,8 @@
+{"total_count": 6, "jobs": [
+  {"name": "lint", "conclusion": "success"},
+  {"name": "build (glyph, x86_64-linux, ubuntu-latest)", "conclusion": "success"},
+  {"name": "build (Stroma, aarch64-darwin, macos-latest)", "conclusion": "failure"},
+  {"name": "build (zeta, aarch64-linux, ubuntu-24.04-arm)", "conclusion": "failure"},
+  {"name": "build (<odd>, x, y)", "conclusion": "cancelled"},
+  {"name": "notify", "conclusion": null}
+]}

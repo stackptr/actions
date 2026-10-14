@@ -1,0 +1,35 @@
+{
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "fields": [
+            {
+              "text": "*Failed*\nunknown",
+              "type": "mrkdwn"
+            },
+            {
+              "text": "*Trigger*\nschedule",
+              "type": "mrkdwn"
+            }
+          ],
+          "type": "section"
+        },
+        {
+          "elements": [
+            {
+              "text": "<https://github.com/stackptr/rc|stackptr/rc> · <https://github.com/stackptr/rc/commit/0123456789abcdef0123456789abcdef01234567|0123456> · <https://github.com/stackptr/rc/actions/runs/4242|View run>",
+              "type": "mrkdwn"
+            }
+          ],
+          "type": "context"
+        }
+      ],
+      "color": "#ECB22E"
+    }
+  ],
+  "channel": "#updates",
+  "text": ":warning: CI cancelled for unknown (main (schedule))",
+  "unfurl_links": false,
+  "unfurl_media": false
+}

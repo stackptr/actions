@@ -11,8 +11,8 @@ inputs:
     default: "#updates"
   status:
     description: >-
-      success, failure, cancelled or info. Required: `job.status` is not
-      available in input defaults, so pass it (for example `${{ job.status }}`).
+      success, failure, cancelled or info. Required: the job context is not
+      available in input defaults, so the caller passes it.
     required: true
   title:
     description: >-

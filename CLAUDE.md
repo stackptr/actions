@@ -10,7 +10,7 @@ Shared composite GitHub Actions and reusable workflows for stackptr repos. The r
   - `action.yml`: runs `github-context.sh`, then `notify.sh`.
   - `test/`: `run.sh` and fixtures under `test/cases/<name>/` (`env`, optional `event.json` and `jobs.json`, `expected.json`).
 - `flake.nix`: the package, checks (shellcheck, payload fixtures) and formatter (alejandra).
-- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: environment secrets can't be passed through `workflow_call`, so a job reads them by declaring `environment:` itself.
+- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: a job reads environment secrets by declaring `environment:` itself, but they're empty unless the caller also sets `secrets: inherit` (`vars` arrive without it).
 
 ## Writing actions
 

@@ -93,7 +93,10 @@ permissions: {}
 jobs:
   approve:
     uses: stackptr/actions/.github/workflows/approve.yml@<sha> # v1.1.0
+    secrets: inherit
 ```
+
+`secrets: inherit` is required. A reusable workflow's `secrets` holds only what its caller passes, even in a job that declares an environment, so without it `APPROVER_PRIVATE_KEY` arrives empty and the token step fails. It also passes the caller's repository-level secrets; repos under stackptr/ops's baseline have none.
 
 `pull_request_target` runs the caller from the default branch, so a PR can't change it; the reusable workflow never checks out the PR. A later push dismisses the approval and the next run approves again.
 

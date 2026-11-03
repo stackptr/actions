@@ -13,8 +13,8 @@ name: Approve owner PRs
 #
 # The caller's `approve` environment (main-only, managed by stackptr/ops)
 # holds APPROVER_CLIENT_ID (variable) and APPROVER_PRIVATE_KEY (secret).
-# Environment secrets can't be passed through workflow_call; the job reads
-# them by declaring the environment itself.
+# The job reads them by declaring the environment itself, but the secret is
+# empty unless the caller sets `secrets: inherit`.
 on:
   workflow_call:
 

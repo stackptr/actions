@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Shared composite GitHub Actions for stackptr repos. The repo is public and other repos pin it by commit SHA, so keep every change small and every action's inputs stable.
+Shared composite GitHub Actions and reusable workflows for stackptr repos. The repo is public and other repos pin it by commit SHA, so keep every change small and every action's inputs stable.
 
 ## Layout
 
@@ -10,7 +10,7 @@ Shared composite GitHub Actions for stackptr repos. The repo is public and other
   - `action.yml`: runs `github-context.sh`, then `notify.sh`.
   - `test/`: `run.sh` and fixtures under `test/cases/<name>/` (`env`, optional `event.json` and `jobs.json`, `expected.json`).
 - `flake.nix`: the package, checks (shellcheck, payload fixtures) and formatter (alejandra).
-- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message).
+- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: environment secrets can't be passed through `workflow_call`, so a job reads them by declaring `environment:` itself.
 
 ## Writing actions
 

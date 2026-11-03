@@ -1,0 +1,48 @@
+name: Approve owner PRs
+
+# Reusable workflow: approves PRs the repository owner authors as the teleoid
+# app, so they can auto-merge once CI passes. The owner can't approve their
+# own PRs, and the "Require approval" ruleset (stackptr/ops) applies to them.
+# Agents' PRs (teleomycete), bots and forks never match.
+#
+# Call it from a workflow on pull_request_target, pinned by SHA, with no
+# permissions (see README.md). pull_request_target runs the caller from the
+# default branch, not from the PR, so a PR can't change what it does. Never
+# check out the PR or interpolate its fields into a script: the job holds
+# teleoid's key.
+#
+# The caller's `approve` environment (main-only, managed by stackptr/ops)
+# holds APPROVER_CLIENT_ID (variable) and APPROVER_PRIVATE_KEY (secret).
+# Environment secrets can't be passed through workflow_call; the job reads
+# them by declaring the environment itself.
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  approve:
+    if: >-
+      github.event_name == 'pull_request_target'
+      && github.event.pull_request.user.login == github.repository_owner
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    environment: approve
+    steps:
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        with:
+          client-id: ${{ vars.APPROVER_CLIENT_ID }}
+          private-key: ${{ secrets.APPROVER_PRIVATE_KEY }}
+      # Approves the commit this event is for; a later push dismisses it and
+      # triggers another run
+      - name: Approve
+        run: |
+          gh api "repos/$REPO/pulls/$PR/reviews" \
+            -f event=APPROVE -f commit_id="$SHA" >/dev/null
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}

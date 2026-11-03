@@ -1,6 +1,6 @@
 # actions
 
-Shared composite GitHub Actions for [stackptr](https://github.com/stackptr) repos.
+Shared composite GitHub Actions and reusable workflows for [stackptr](https://github.com/stackptr) repos.
 
 ## slack-notify
 
@@ -76,6 +76,26 @@ SLACK_TOKEN_FILE="$CREDENTIALS_DIRECTORY/slack-token" SLACK_CHANNEL='#alerts' \
 ```
 
 The variables are documented at the top of [`slack-notify/notify.sh`](slack-notify/notify.sh).
+
+## approve (reusable workflow)
+
+Approves PRs the repository owner authors, as the teleoid GitHub App, so they can auto-merge once CI passes under a ruleset that requires an approval. Agents' PRs, bots' PRs, drafts and forks are skipped. The caller needs an `approve` environment limited to `main`, with `APPROVER_CLIENT_ID` as a variable and `APPROVER_PRIVATE_KEY` as a secret, and teleoid installed with Contents and Pull requests read/write (its approval counts toward required reviews only with Contents: write).
+
+```yaml
+name: Approve my PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+jobs:
+  approve:
+    uses: stackptr/actions/.github/workflows/approve.yml@<sha> # v1.1.0
+```
+
+`pull_request_target` runs the caller from the default branch, so a PR can't change it; the reusable workflow never checks out the PR. A later push dismisses the approval and the next run approves again.
 
 ## Development
 

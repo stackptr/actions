@@ -10,7 +10,7 @@ Shared composite GitHub Actions and reusable workflows for stackptr repos. The r
   - `action.yml`: runs `github-context.sh`, then `notify.sh`.
   - `test/`: `run.sh` and fixtures under `test/cases/<name>/` (`env`, optional `event.json` and `jobs.json`, `expected.json`).
 - `flake.nix`: the package, checks (shellcheck, payload fixtures) and formatter (alejandra).
-- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: a job reads environment secrets by declaring `environment:` itself, but they're empty unless the caller also sets `secrets: inherit` (`vars` arrive without it).
+- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), `approve-prs.yml` (approves my PRs here through the reusable workflow), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: a job reads environment secrets by declaring `environment:` itself, but they're empty unless the caller also sets `secrets: inherit` (`vars` arrive without it).
 
 ## Writing actions
 
@@ -31,7 +31,9 @@ In a sandboxed cloud session `github:` inputs fail with HTTP 403 but `git clone`
 
 ## Secrets
 
-`SLACK_BOT_TOKEN` (Hypha's `xoxb-` token) is a per-repo Actions secret: personal accounts have no account-level secrets. The owner adds it and the Slack app scopes; sessions can't, and shouldn't work around that.
+This repo is under stackptr/ops's baseline: no repository-level secrets (ops's daily check fails if one appears), only main-only environments that ops manages. `SLACK_BOT_TOKEN` (Hypha's `xoxb-` token) is in `notify`, which `smoke.yml` declares; `approve` holds teleoid's key for `approve-prs.yml`. The owner seals secrets in ops and sets the Slack app's scopes; sessions can't, and shouldn't work around that.
+
+`approve-prs.yml` calls this repo's own reusable `approve.yml` by local path (`./.github/workflows/approve.yml`). Under `pull_request_target` that resolves from `main`, so a PR's changes to `approve.yml` take effect here only once merged, while other repos keep the SHA they pin.
 
 ## Branching
 

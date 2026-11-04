@@ -11,6 +11,8 @@ notify:
   needs: [lint, build]
   if: failure()
   runs-on: ubuntu-latest
+  # Main-only environment holding SLACK_BOT_TOKEN, so branch code never sees it
+  environment: notify
   permissions:
     actions: read
   steps:
@@ -20,6 +22,8 @@ notify:
       status: failure
       failed-jobs: true
 ```
+
+In repos under stackptr/ops's baseline, `SLACK_BOT_TOKEN` lives in a main-only `notify` environment, never as a repository secret, so the job declares `environment: notify`. That also means only runs on `main` notify; failures on PRs show on the PR.
 
 Pin by commit SHA with a version comment; Dependabot bumps it. The preview for that call is `:x: CI failed for Stroma (PR #659)`, with Failed and Trigger fields and links to the repo, commit and run.
 

@@ -1,7 +1,8 @@
 name: Smoke test
 
-# Posts real messages, so it runs only on request. Needs the SLACK_BOT_TOKEN
-# repo secret and a channel Hypha can post in.
+# Posts real messages, so it runs only on request. SLACK_BOT_TOKEN comes from
+# the main-only `notify` environment (managed by stackptr/ops), so it runs
+# only when dispatched from main. Needs a channel Hypha can post in.
 on:
   workflow_dispatch:
     inputs:
@@ -16,6 +17,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    environment: notify
     steps:
     - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
     - id: post

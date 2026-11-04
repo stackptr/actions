@@ -1,0 +1,19 @@
+name: Approve my PRs
+
+# Approves PRs I author as the teleoid app, so they can auto-merge once CI
+# passes; I can't approve my own PRs, and stackptr/ops's "Require approval"
+# ruleset applies to them. Calls this repo's own reusable approve.yml by local
+# path: under pull_request_target that resolves from main, not from the PR,
+# so a PR can't change what runs. It reads teleoid's credentials from the
+# main-only `approve` environment.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+jobs:
+  approve:
+    uses: ./.github/workflows/approve.yml
+    # Environment secrets reach a reusable workflow only with this
+    secrets: inherit

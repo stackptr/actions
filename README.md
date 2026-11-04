@@ -25,7 +25,7 @@ notify:
 
 In repos under stackptr/ops's baseline, `SLACK_BOT_TOKEN` lives in a main-only `notify` environment, never as a repository secret, so the job declares `environment: notify`. That also means only runs on `main` notify; failures on PRs show on the PR.
 
-Pin by commit SHA with a version comment; Dependabot bumps it. The preview for that call is `:x: CI failed for Stroma (PR #659)`, with Failed and Trigger fields and links to the repo, commit and run.
+Pin a release's commit SHA with its version as a comment, as above; Dependabot bumps both when a newer release is tagged. Releases are listed on the repo's Releases page. The preview for that call is `:x: CI failed for Stroma (PR #659)`, with Failed and Trigger fields and links to the repo, commit and run.
 
 A success message from a release workflow, which shouldn't fail the release if Slack is down:
 

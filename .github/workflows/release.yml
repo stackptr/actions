@@ -1,0 +1,36 @@
+name: Release
+
+# Publishes a GitHub release, with generated notes, for each version tag. Only
+# the admin role may push tags here (stackptr/ops's "Release tags" ruleset),
+# and callers' Dependabot updates their pins to each new release, so a tag
+# must point at a commit already on main: the job refuses one that doesn't.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check the tag is on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # "behind" or "identical": every commit in the tag is on main
+          status=$(gh api "repos/$REPO/compare/main...$TAG" --jq .status)
+          if [[ $status != behind && $status != identical ]]; then
+            echo "::error::$TAG isn't on main (compare status: $status); delete the tag and tag a commit on main"
+            exit 1
+          fi
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --repo "$REPO" --verify-tag --generate-notes --title "$TAG"

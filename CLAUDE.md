@@ -10,7 +10,7 @@ Shared composite GitHub Actions and reusable workflows for stackptr repos. The r
   - `action.yml`: runs `github-context.sh`, then `notify.sh`.
   - `test/`: `run.sh` and fixtures under `test/cases/<name>/` (`env`, optional `event.json` and `jobs.json`, `expected.json`).
 - `flake.nix`: the package, checks (shellcheck, payload fixtures) and formatter (alejandra).
-- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), `approve-prs.yml` (approves my PRs here through the reusable workflow), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: a job reads environment secrets by declaring `environment:` itself, but they're empty unless the caller also sets `secrets: inherit` (`vars` arrive without it).
+- `.github/workflows/`: `ci.yml` (flake check, plus the action run in dry-run mode), `smoke.yml` (posts a real message), `approve-prs.yml` (approves my PRs here through the reusable workflow), `release.yml` (publishes a release for each version tag), and the reusable `approve.yml` (`workflow_call` only; approves the owner's PRs as teleoid from the caller's `approve` environment). A reusable workflow runs with the caller's event, repository and environments: a job reads environment secrets by declaring `environment:` itself, but they're empty unless the caller also sets `secrets: inherit` (`vars` arrive without it).
 
 ## Writing actions
 
@@ -44,9 +44,18 @@ This repo is under stackptr/ops's baseline: no repository-level secrets (ops's d
 
 ## Guardrails
 
-- Don't merge a PR, create or move a tag, or run `smoke.yml` unless asked. Callers pin tags and SHAs, so moving `v1` changes every caller at once.
+- Don't merge a PR, create or move a tag, or run `smoke.yml` unless asked. Only the admin role can push tags here anyway (stackptr/ops's "Release tags" ruleset), and a tag is what callers' Dependabot updates them to.
 - Don't put private information in this repo: it is public.
 - Don't change an input's name or default in a pinned release; add a new input instead.
+
+## Releasing
+
+Callers pin a release's commit SHA with its version as a comment (`@<sha> # v1.1.0`), and their Dependabot opens a PR for each newer release. A merge to `main` reaches no one until it's released.
+
+- Version by what callers see: **patch** for fixes and docs-only changes callers might want, **minor** for a new action, workflow, input or output, **major** for a removed or renamed input or output, a changed default, or behavior a caller would have to adapt to. Docs-only changes don't need a release.
+- To release: on an up-to-date `main`, `git tag -s vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`. `release.yml` checks the tag is on `main` and publishes the release with generated notes from the merged PRs.
+- No floating major tag (`v1`): every caller pins a SHA, and a moving tag would need force-pushes.
+- A PR that callers will need released says so in its description and proposes the version.
 
 ## Committing
 

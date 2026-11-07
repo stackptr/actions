@@ -104,6 +104,48 @@ jobs:
 
 `pull_request_target` runs the caller from the default branch, so a PR can't change it; the reusable workflow never checks out the PR. A later push dismisses the approval and the next run approves again.
 
+## update-flake (reusable workflow)
+
+Updates the caller's `flake.lock` as the teleotrope GitHub App, opens a PR, waits for the required checks and merges it. Only for repos whose required checks build or check the flake: teleotrope bypasses the approval ruleset, so CI is the only gate on what it merges. The caller needs:
+
+- an `update` environment limited to `main`, with `UPDATER_CLIENT_ID` as a variable and `UPDATER_PRIVATE_KEY` as a secret;
+- teleotrope installed with Contents and Pull requests read/write;
+- teleotrope as a bypass actor on the approval ruleset only, never on the one requiring CI.
+
+```yaml
+name: Update flake inputs
+
+on:
+  schedule:
+    - cron: "10 5 * * *"
+  workflow_dispatch:
+    inputs:
+      inputs:
+        description: Flake inputs to update, separated by spaces or commas (blank updates all)
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  checks: read
+  pull-requests: read
+
+jobs:
+  update:
+    uses: stackptr/actions/.github/workflows/update-flake.yml@<sha> # v1.2.0
+    with:
+      flake-inputs: ${{ inputs.inputs }}
+    secrets: inherit
+```
+
+`secrets: inherit` is required, as for `approve`: without it `UPDATER_PRIVATE_KEY` arrives empty. The job asks for `contents`, `checks` and `pull-requests` read, to check out the repo and wait on the PR's checks; a reusable job's token gets no more than its caller grants, so the run fails unless the caller grants all three. Opening and merging the PR uses the app's token.
+
+| Input | Default | Notes |
+|---|---|---|
+| `flake-inputs` | | Inputs to update, separated by spaces or commas. Blank updates every input on `gh/update-flake`; otherwise each name is checked against `flake.lock` (an unknown one fails the run) and the PR comes from `gh/update-flake-<run id>`, so neither the daily run nor another partial update overwrites it. |
+
+The PR is titled `chore: update flake inputs` (or `chore: update <inputs>`), with `nix flake update`'s commit message as its body, and squash-merged with `--match-head-commit`. If nothing changed, no PR is opened. A failing required check fails the run and leaves the PR open.
+
 ## Development
 
 `nix flake check` runs shellcheck, builds the package and diffs every fixture in `slack-notify/test/cases` against its expected dry-run payload. `smoke.yml` posts real messages when dispatched.

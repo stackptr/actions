@@ -1,0 +1,39 @@
+name: Update flake inputs
+
+# Updates flake.lock daily, or on demand for selected inputs, as the
+# teleotrope app, and merges the PR once the required checks pass.
+#
+# The job is stackptr/actions's reusable update-flake.yml, shared by every
+# repo whose flake teleotrope updates (stackptr/ops's `flakeUpdates`). It
+# reads teleotrope's credentials from this repo's main-only `update`
+# environment.
+#
+# Calls this repo's own update-flake.yml by local path. Schedule and
+# dispatch run from main, so it always runs main's version, released or not.
+on:
+  schedule:
+    - cron: "25 5 * * *"
+  workflow_dispatch:
+    inputs:
+      inputs:
+        description: Flake inputs to update, separated by spaces or commas (blank updates all)
+        type: string
+        default: ""
+
+# The reusable job's token gets no more than this
+permissions:
+  contents: read
+  # Waiting on the PR's checks
+  checks: read
+  pull-requests: read
+
+jobs:
+  update:
+    uses: ./.github/workflows/update-flake.yml
+    with:
+      flake-inputs: ${{ inputs.inputs }}
+    # A reusable workflow's `secrets` holds only what the caller passes, even
+    # for a job that declares an environment: without this, the `update`
+    # environment's UPDATER_PRIVATE_KEY arrives empty. It also passes any
+    # repository-level secrets, of which stackptr/ops allows none.
+    secrets: inherit

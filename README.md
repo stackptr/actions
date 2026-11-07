@@ -112,6 +112,8 @@ Updates the caller's `flake.lock` as the teleotrope GitHub App, opens a PR, wait
 - teleotrope installed with Contents and Pull requests read/write;
 - teleotrope as a bypass actor on the approval ruleset only, never on the one requiring CI.
 
+For repos under stackptr/ops, its `flakeUpdates` option sets up the environment, the variable and the bypass; teleotrope's install and its sealed key are by hand. This repo calls its own copy by local path (`update.yml`).
+
 ```yaml
 name: Update flake inputs
 
